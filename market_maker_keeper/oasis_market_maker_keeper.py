@@ -206,12 +206,25 @@ class OasisMarketMakerKeeper:
                            self.otc.get_orders(self.buy_token, self.sell_token)))
 
     def our_sell_orders(self, our_orders: list):
-        return list(filter(lambda order: order.buy_token == self.token_buy.address and
+        sell_orders = list(filter(lambda order: order.buy_token == self.token_buy.address and
                                          order.pay_token == self.token_sell.address, our_orders))
+        
+        def normalize(order):
+            order.buy_amount = self.buy_token.normalize_amount(order.buy_amount)
+            order.pay_amount = self.sell_token.normalize_amount(order.pay_amount)
+            return order
+
+        return list(map(normalize, sell_orders))
 
     def our_buy_orders(self, our_orders: list):
-        return list(filter(lambda order: order.buy_token == self.token_sell.address and
+        buy_orders = list(filter(lambda order: order.buy_token == self.token_sell.address and
                                          order.pay_token == self.token_buy.address, our_orders))
+        def normalize(order):
+            order.buy_amount = self.sell_token.normalize_amount(order.buy_amount)
+            order.pay_amount = self.buy_token.normalize_amount(order.pay_amount)
+            return order
+
+        return list(map(normalize, buy_orders))
 
     def synchronize_orders(self):
         # If market is closed, cancel all orders but do not terminate the keeper.
