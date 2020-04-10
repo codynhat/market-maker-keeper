@@ -201,30 +201,29 @@ class OasisMarketMakerKeeper:
             return self.sell_token.normalize_amount(token.balance_of(self.our_address))
 
     def our_orders(self):
-        return list(filter(lambda order: order.maker == self.our_address,
+        orders = list(filter(lambda order: order.maker == self.our_address,
                            self.otc.get_orders(self.sell_token, self.buy_token) +
                            self.otc.get_orders(self.buy_token, self.sell_token)))
-
-    def our_sell_orders(self, our_orders: list):
-        sell_orders = list(filter(lambda order: order.buy_token == self.token_buy.address and
-                                         order.pay_token == self.token_sell.address, our_orders))
         
         def normalize(order):
-            order.buy_amount = self.buy_token.normalize_amount(order.buy_amount)
-            order.pay_amount = self.sell_token.normalize_amount(order.pay_amount)
+            if order.buy_token == self.buy_token.address:
+                order.buy_amount = self.buy_token.normalize_amount(order.buy_amount)
+                order.pay_amount = self.sell_token.normalize_amount(order.pay_amount)
+            elif order.pay_token == self.buy_token.address:
+                order.buy_amount = self.sell_token.normalize_amount(order.buy_amount)
+                order.pay_amount = self.buy_token.normalize_amount(order.pay_amount)
+            
             return order
 
-        return list(map(normalize, sell_orders))
+        return list(map(normalize, orders))
+
+    def our_sell_orders(self, our_orders: list):
+        return list(filter(lambda order: order.buy_token == self.token_buy.address and
+                                         order.pay_token == self.token_sell.address, our_orders))
 
     def our_buy_orders(self, our_orders: list):
-        buy_orders = list(filter(lambda order: order.buy_token == self.token_sell.address and
+        return list(filter(lambda order: order.buy_token == self.token_sell.address and
                                          order.pay_token == self.token_buy.address, our_orders))
-        def normalize(order):
-            order.buy_amount = self.sell_token.normalize_amount(order.buy_amount)
-            order.pay_amount = self.buy_token.normalize_amount(order.pay_amount)
-            return order
-
-        return list(map(normalize, buy_orders))
 
     def synchronize_orders(self):
         # If market is closed, cancel all orders but do not terminate the keeper.
