@@ -52,7 +52,7 @@ class OasisMarketMakerKeeper:
     def __init__(self, args: list, **kwargs):
         parser = argparse.ArgumentParser(prog='oasis-market-maker-keeper')
 
-        parser.add_argument("--rpc-host", type=str, default="localhost",
+        parser.add_argument("--rpc-endpoint", type=str, default="localhost",
                             help="JSON-RPC host (default: `localhost')")
 
         parser.add_argument("--rpc-port", type=int, default=8545,

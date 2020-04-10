@@ -128,7 +128,7 @@ class CoinbaseMarketMakerKeeper:
     def startup(self):
         # Get maximum number of decimals for prices and amounts.
         quote_increment = self.coinbase_api.get_product(self.arguments.pair)["quote_increment"]
-        self.precision = -(int(log10(float(quote_increment)))+1)
+        self.precision = max(2, -(int(log10(float(quote_increment)))+1))
 
     def shutdown(self):
         self.order_book_manager.cancel_all_orders()
