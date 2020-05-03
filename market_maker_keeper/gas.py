@@ -38,15 +38,15 @@ class SmartGasPrice(GasPrice):
         standard_price = self.gas_station.standard_price()
         if standard_price is not None:
             # start from standard_price
-            # increase by 10 GWei every 60 seconds
-            # max is standard_price + 50 GWei
-            return min(int(standard_price) + int(time_elapsed/60)*(10*self.GWEI), int(standard_price)+(50*self.GWEI))
+            # increase by 5 GWei every 60 seconds
+            # max is standard_price + 10 GWei
+            return min(int(standard_price) + int(time_elapsed/60)*(5*self.GWEI), int(standard_price)+(10*self.GWEI))
         else:
             # default gas pricing when EthGasStation feed is down
             return IncreasingGasPrice(initial_price=5*self.GWEI,
-                                      increase_by=10*self.GWEI,
+                                      increase_by=5*self.GWEI,
                                       every_secs=60,
-                                      max_price=50*self.GWEI).get_gas_price(time_elapsed)
+                                      max_price=20*self.GWEI).get_gas_price(time_elapsed)
 
 
 class GasPriceFactory:
