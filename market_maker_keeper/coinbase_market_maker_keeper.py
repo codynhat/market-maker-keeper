@@ -139,9 +139,9 @@ class CoinbaseMarketMakerKeeper:
         q = self.arguments.pair.split("-")[1]
         for c in currencies:
             if c["id"] == b:
-                self.buy_precision = float(c["min_size"])
+                self.buy_precision = max(0, -(int(log10(float(c["min_size"])))+1))
             if c["id"] == q:
-                self.sell_precision = float(c["min_size"])
+                self.sell_precision = max(0, -(int(log10(float(c["min_size"])))+1))
 
     def shutdown(self):
         self.order_book_manager.cancel_all_orders()
