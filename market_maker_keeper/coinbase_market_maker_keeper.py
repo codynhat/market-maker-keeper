@@ -132,7 +132,16 @@ class CoinbaseMarketMakerKeeper:
     def startup(self):
         # Get maximum number of decimals for prices and amounts.
         quote_increment = self.coinbase_api.get_product(self.arguments.pair)["quote_increment"]
-        self.precision = max(2, -(int(log10(float(quote_increment)))+1))
+        self.quote_increment = max(2, -(int(log10(float(quote_increment)))+1))
+
+        currencies = self.coinbase_api._http_unauthenticated("GET", f"/currencies", {})
+        b = self.arguments.pair.split("-")[0]
+        q = self.arguments.pair.split("-")[1]
+        for c in currencies:
+            if c["id"] == b:
+                self.buy_precision = c["min_size"]
+            if c["id"] == q:
+                self.sell_precision = c["min_size"]
 
     def shutdown(self):
         self.order_book_manager.cancel_all_orders()
@@ -188,14 +197,13 @@ class CoinbaseMarketMakerKeeper:
 
     def place_orders(self, new_orders: List[NewOrder]):
         def place_order_function(new_order_to_be_placed):
-            price = round(new_order_to_be_placed.price, self.precision)
-            amount = new_order_to_be_placed.pay_amount if new_order_to_be_placed.is_sell else new_order_to_be_placed.buy_amount
-            amount = round(amount, self.precision)
+            price = round(new_order_to_be_placed.price, self.quote_increment)
+            amount = round(new_order_to_be_placed.pay_amount, self.sell_precision) if new_order_to_be_placed.is_sell else round(new_order_to_be_placed.buy_amount, self.buy_precision)
 
             if not self.dry_run:
                 order_id = self.coinbase_api.place_order(self.pair(), new_order_to_be_placed.is_sell, price, amount)
 
-            return Order(order_id=None,
+            return Order(order_id=order_id,
                          pair=self.pair(),
                          is_sell=new_order_to_be_placed.is_sell,
                          price=price,
