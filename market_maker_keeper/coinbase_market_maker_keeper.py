@@ -93,9 +93,13 @@ class CoinbaseMarketMakerKeeper:
         parser.add_argument("--debug", dest='debug', action='store_true',
                             help="Enable debug output")
 
+        parser.add_argument("--dry-run", dest='dry_run', action='store_true',
+                            help="Enable dry run")
+
         self.arguments = parser.parse_args(args)
         setup_logging(self.arguments)
 
+        self.dry_run = self.arguments.dry_run
         self.bands_config = ReloadableConfig(self.arguments.config)
         self.price_feed = PriceFeedFactory().create_price_feed(self.arguments)
         self.spread_feed = create_spread_feed(self.arguments)
@@ -188,9 +192,10 @@ class CoinbaseMarketMakerKeeper:
             amount = new_order_to_be_placed.pay_amount if new_order_to_be_placed.is_sell else new_order_to_be_placed.buy_amount
             amount = round(amount, self.precision)
 
-            order_id = self.coinbase_api.place_order(self.pair(), new_order_to_be_placed.is_sell, price, amount)
+            if not self.dry_run:
+                order_id = self.coinbase_api.place_order(self.pair(), new_order_to_be_placed.is_sell, price, amount)
 
-            return Order(order_id=order_id,
+            return Order(order_id=None,
                          pair=self.pair(),
                          is_sell=new_order_to_be_placed.is_sell,
                          price=price,
