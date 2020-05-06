@@ -202,6 +202,8 @@ class CoinbaseMarketMakerKeeper:
 
             if not self.dry_run:
                 order_id = self.coinbase_api.place_order(self.pair(), new_order_to_be_placed.is_sell, price, amount)
+            else:
+                self.logger.info(f"Dry run order amount: {amount} price: {price}")
 
             return Order(order_id=order_id,
                          pair=self.pair(),
