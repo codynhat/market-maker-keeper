@@ -315,6 +315,10 @@ class PriceFeedFactory:
               return GdaxMidpointPriceFeed(product_id="REP-USD",
                                            expiry=price_feed_expiry_argument)
 
+        elif price_feed_argument == 'mana_usdc-pair-midpoint':
+              return GdaxMidpointPriceFeed(product_id="MANA-USDC",
+                                           expiry=price_feed_expiry_argument)
+
         elif price_feed_argument.startswith("fixed:"):
             price_feed = FixedPriceFeed(Wad.from_number(price_feed_argument[6:]))
 
