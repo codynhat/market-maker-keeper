@@ -133,7 +133,7 @@ class CoinbaseMarketMakerKeeper:
         # Get maximum number of decimals for prices and amounts.
         quote_increment = self.coinbase_api.get_product(self.arguments.pair)["quote_increment"]
         self.logger.debug(f"Quote increment: {quote_increment}")
-        self.quote_increment = max(2, -(int(log10(float(quote_increment)))+1))
+        self.quote_increment = max(2, -(int(log10(float(quote_increment)))))
         self.logger.debug(f"Quote precision: {self.quote_increment}")
 
         currencies = self.coinbase_api._http_unauthenticated("GET", f"/currencies", {})
@@ -141,11 +141,11 @@ class CoinbaseMarketMakerKeeper:
         q = self.arguments.pair.split("-")[1]
         for c in currencies:
             if c["id"] == b:
-                self.buy_precision = max(0, -(int(log10(float(c["min_size"])))+1))
+                self.buy_precision = max(0, -(int(log10(float(c["min_size"])))))
                 self.logger.debug(f"Buy precision: {self.buy_precision}")
                 self.logger.debug(f"Buy precision: {c}")
             if c["id"] == q:
-                self.sell_precision = max(0, -(int(log10(float(c["min_size"])))+1))
+                self.sell_precision = max(0, -(int(log10(float(c["min_size"])))))
                 self.logger.debug(f"Sell precision: {self.sell_precision}")
                 self.logger.debug(f"Sell precision: {c}")
 
