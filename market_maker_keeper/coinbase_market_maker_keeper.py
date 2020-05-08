@@ -132,7 +132,7 @@ class CoinbaseMarketMakerKeeper:
     def startup(self):
         # Get maximum number of decimals for prices and amounts.
         quote_increment = self.coinbase_api.get_product(self.arguments.pair)["quote_increment"]
-        self.quote_increment = max(2, -(int(log10(float(quote_increment)))+1))
+        self.quote_increment = -(int(log10(float(quote_increment)))+1)
         self.logger.debug(f"Quote precision: {self.quote_increment}")
 
         currencies = self.coinbase_api._http_unauthenticated("GET", f"/currencies", {})
@@ -203,7 +203,7 @@ class CoinbaseMarketMakerKeeper:
     def place_orders(self, new_orders: List[NewOrder]):
         def place_order_function(new_order_to_be_placed):
             price = round(new_order_to_be_placed.price, self.quote_increment)
-            amount = round(new_order_to_be_placed.pay_amount, self.sell_precision) if new_order_to_be_placed.is_sell else round(new_order_to_be_placed.buy_amount, self.buy_precision)
+            amount = round(new_order_to_be_placed.pay_amount, min(self.quote_increment, self.sell_precision)) if new_order_to_be_placed.is_sell else round(new_order_to_be_placed.buy_amount, min(self.quote_increment, self.buy_precision))
 
             if not self.dry_run:
                 order_id = self.coinbase_api.place_order(self.pair(), new_order_to_be_placed.is_sell, price, amount)
