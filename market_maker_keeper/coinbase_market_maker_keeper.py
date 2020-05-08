@@ -140,10 +140,12 @@ class CoinbaseMarketMakerKeeper:
         for c in currencies:
             if c["id"] == b:
                 self.buy_precision = max(0, -(int(log10(float(c["min_size"])))+1))
+                self.logger.debug(f"Buy precision: {self.buy_precision}")
+                self.logger.debug(f"Buy precision: {c}")
             if c["id"] == q:
                 self.sell_precision = max(0, -(int(log10(float(c["min_size"])))+1))
-        self.logger.debug(f"Buy precision: {self.buy_precision}")
-        self.logger.debug(f"Sell precision: {self.sell_precision}")
+                self.logger.debug(f"Sell precision: {self.sell_precision}")
+                self.logger.debug(f"Sell precision: {c}")
 
     def shutdown(self):
         self.order_book_manager.cancel_all_orders()
