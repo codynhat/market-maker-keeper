@@ -133,6 +133,7 @@ class CoinbaseMarketMakerKeeper:
         # Get maximum number of decimals for prices and amounts.
         quote_increment = self.coinbase_api.get_product(self.arguments.pair)["quote_increment"]
         self.quote_increment = max(2, -(int(log10(float(quote_increment)))+1))
+        self.logger.debug(f"Quote precision: {self.quote_increment}")
 
         currencies = self.coinbase_api._http_unauthenticated("GET", f"/currencies", {})
         b = self.arguments.pair.split("-")[0]
