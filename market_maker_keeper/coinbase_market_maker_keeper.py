@@ -205,7 +205,7 @@ class CoinbaseMarketMakerKeeper:
         def place_order_function(new_order_to_be_placed):
             price = round(new_order_to_be_placed.price, self.quote_increment)
             amount = new_order_to_be_placed.pay_amount if new_order_to_be_placed.is_sell else new_order_to_be_placed.buy_amount
-            amount = round(amount, self.buy_precision)
+            amount = round(amount, min(self.quote_increment, self.buy_precision))
 
             if not self.dry_run:
                 order_id = self.coinbase_api.place_order(self.pair(), new_order_to_be_placed.is_sell, price, amount)
